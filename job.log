@@ -1,0 +1,70 @@
+[M::bam2fq_mainloop] processed 1186136 reads
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@bc-26-2-15>
+Subject: Job 5839739: </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.9i2c0idw/snakejob.convert_fastq.1.sh> in cluster <farm3> Done
+
+Job </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.9i2c0idw/snakejob.convert_fastq.1.sh> was submitted from host <farm3-head5> by user <ge2> in cluster <farm3>.
+Job was executed on host(s) <5*bc-26-2-15>, in queue <normal>, as user <ge2> in cluster <farm3>.
+</nfs/users/nfs_g/ge2> was used as the home directory.
+</nfs/users/nfs_g/ge2/software/sc_snakemake> was used as the working directory.
+Started at Wed Oct 19 16:58:31 2016
+Results reported on Wed Oct 19 16:59:45 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+/nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.9i2c0idw/snakejob.convert_fastq.1.sh
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   77.52 sec.
+    Max Memory :                                 572 MB
+    Average Memory :                             366.00 MB
+    Total Requested Memory :                     36000.00 MB
+    Delta Memory :                               35428.00 MB
+    Max Swap :                                   954 MB
+    Max Processes :                              7
+    Max Threads :                                9
+
+The output (if any) is above this job summary.
+
+[M::bam2fq_mainloop] processed 1363882 reads
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@bc-27-2-13>
+Subject: Job 5839737: </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.9i2c0idw/snakejob.convert_fastq.0.sh> in cluster <farm3> Done
+
+Job </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.9i2c0idw/snakejob.convert_fastq.0.sh> was submitted from host <farm3-head5> by user <ge2> in cluster <farm3>.
+Job was executed on host(s) <5*bc-27-2-13>, in queue <normal>, as user <ge2> in cluster <farm3>.
+</nfs/users/nfs_g/ge2> was used as the home directory.
+</nfs/users/nfs_g/ge2/software/sc_snakemake> was used as the working directory.
+Started at Wed Oct 19 16:58:28 2016
+Results reported on Wed Oct 19 16:59:51 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+/nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.9i2c0idw/snakejob.convert_fastq.0.sh
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   87.52 sec.
+    Max Memory :                                 656 MB
+    Average Memory :                             411.20 MB
+    Total Requested Memory :                     36000.00 MB
+    Delta Memory :                               35344.00 MB
+    Max Swap :                                   1033 MB
+    Max Processes :                              7
+    Max Threads :                                9
+
+The output (if any) is above this job summary.
+

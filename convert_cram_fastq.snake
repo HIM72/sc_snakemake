@@ -1,0 +1,32 @@
+import os
+from utils.parse import read_quants, read_qcs
+
+variables = glob_wildcards(os.path.join(config['cram_folder'], config['pattern'] + '.cram'))
+
+rule all:
+    input:
+        expand(os.path.join(config["fastq_folder"],
+                            config['pattern'] + "_forward.fastq"),
+               run=variables.run, lane=variables.lane, 
+               tag_index=variables.tag_index),
+        expand(os.path.join(config["fastq_folder"],
+                            config['pattern'] + "_reverse.fastq"),
+               run=variables.run, lane=variables.lane,
+               tag_index=variables.tag_index),
+
+
+rule convert_fastq:
+    input:
+        os.path.join(config['cram_folder'], config["pattern"] + '.cram')
+    output:
+        forward=os.path.join(config['fastq_folder'],
+                             config['pattern'] + "_forward.fastq"),
+        reverse=os.path.join(config['fastq_folder'],
+                             config['pattern'] + "_reverse.fastq")
+    log:
+        os.path.join(config['log_folder'], "fastq_conversion",
+                     "{run}_{lane}#{tag_index}.log")
+    shell:
+        "samtools sort -m 10G -n -T %s {input} | "
+        "samtools fastq -F 0xB00 -1 {output.forward} -2 {output.reverse} -"
+
