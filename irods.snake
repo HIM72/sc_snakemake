@@ -5,41 +5,45 @@ import json
 from pprint import pprint
 import pandas as pd
 
-# config = snakemake.load_configfile('config.json')
-with open('config.json') as fh:
-    config = json.load(fh)
-collection = Collection(config['study_id'])
-items = collection.get_collection_metadata()
-with open('items.json', 'w') as fh:
+query = config['query']
+
+# Collect metadata from irods before fetching
+collection = Collection(query['study_id'])
+items = collection.get_collection_metadata(
+    id_run=query.get('id_run'), lane=query.get('lane'),
+    tag_index=query.get('tag_index'))
+
+if not os.path.isdir(config['tmp_folder']):
+    os.makedirs(config['tmp_folder'])
+metadata_file = os.path.join(config['tmp_folder'], 'items.json')
+with open(metadata_file, 'w') as fh:
     json.dump(items, fh)
 
 object_collection = {q['data_object']: q['collection'] for q in items}
-cram_folder = os.path.join(config['data_folder'], 'cram')
-LOG_FOLDER = "logs"
 
 # Get list of data objects
 
 rule all:
     input:
-        expand(os.path.join(config['data_folder'], 'cram',
-                '{sample}'), sample=[query['data_object'] for query in items]),
-        os.path.join(config['results_directory'], "irods_metadata.csv")
+        expand(os.path.join(config['cram_folder'], '{sample}'),
+               sample=[query['data_object'] for query in items]),
+        os.path.join(config['tmp_folder'], "irods_metadata.csv")
 
 rule baton_query:
     output:
-        os.path.join(cram_folder, '{sample}')
+        os.path.join(config['cram_folder'], '{sample}')
     log:
-        os.path.join(LOG_FOLDER, "irods", "{sample}.log")
+        os.path.join(config['log_folder'], "irods", "{sample}.log")
     run:
         collection.execute_baton(
             'baton-get --save', 
             query={'collection': object_collection[wildcards.sample],
                    'data_object': wildcards.sample,
-                   'directory': cram_folder})
+                   'directory': config['cram_folder']})
 
 rule irods_metadata:
     output:
-        os.path.join(config['results_directory'], "irods_metadata.csv")
+        os.path.join(config['tmp_folder'], "irods_metadata.csv")
     run:
         index_metadata = {item['data_object']: item['avus'] for item in items}
         df = pd.DataFrame.from_dict(index_metadata, orient='index')

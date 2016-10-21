@@ -1,11 +1,12 @@
 {
     "data_folder": "data",
-    "results_folder": "results",
+    "results_folder": "data/results",
     "cram_folder": "data/cram",
     "fastq_folder": "data/fastq",
+    "tmp_folder": "data/.tmp",
     "log_folder": "logs",
-    "study_id": 4327,
     "query": {
+        "study_id": 4327,
         "lane": 1,
         "run": 20933,
         "tag_index": 43

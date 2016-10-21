@@ -68,3 +68,180 @@ Resource usage summary:
 
 The output (if any) is above this job summary.
 
+Executing baton command: jq -n '{"avus": [{"attribute": "target", "value": "1"}, {"attribute": "study_id", "value": "4327"}, {"attribute": "tag_index", "value": "43"}, {"attribute": "lane", "value": "1"}], "collection": "/seq"}' | baton-metaquery --avu
+Executing baton command: jq -n '{"directory": "data/cram", "data_object": "20933_1#43.cram", "collection": "/seq/20933"}' | baton-get --save
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@bc-27-2-07>
+Subject: Job 5950454: </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.fetp5kni/snakejob.baton_query.0.sh> in cluster <farm3> Done
+
+Job </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.fetp5kni/snakejob.baton_query.0.sh> was submitted from host <farm3-head5> by user <ge2> in cluster <farm3>.
+Job was executed on host(s) <5*bc-27-2-07>, in queue <normal>, as user <ge2> in cluster <farm3>.
+</nfs/users/nfs_g/ge2> was used as the home directory.
+</nfs/users/nfs_g/ge2/software/sc_snakemake> was used as the working directory.
+Started at Fri Oct 21 11:15:48 2016
+Results reported on Fri Oct 21 11:15:54 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+/nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.fetp5kni/snakejob.baton_query.0.sh
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.95 sec.
+    Max Memory :                                 48 MB
+    Average Memory :                             48.00 MB
+    Total Requested Memory :                     3600.00 MB
+    Delta Memory :                               3552.00 MB
+    Max Swap :                                   294 MB
+    Max Processes :                              4
+    Max Threads :                                5
+
+The output (if any) is above this job summary.
+
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@bc-25-2-08>
+Subject: Job 5950455: </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.fetp5kni/snakejob.irods_metadata.1.sh> in cluster <farm3> Done
+
+Job </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.fetp5kni/snakejob.irods_metadata.1.sh> was submitted from host <farm3-head5> by user <ge2> in cluster <farm3>.
+Job was executed on host(s) <5*bc-25-2-08>, in queue <normal>, as user <ge2> in cluster <farm3>.
+</nfs/users/nfs_g/ge2> was used as the home directory.
+</nfs/users/nfs_g/ge2/software/sc_snakemake> was used as the working directory.
+Started at Fri Oct 21 11:15:49 2016
+Results reported on Fri Oct 21 11:16:08 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+/nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.fetp5kni/snakejob.irods_metadata.1.sh
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.88 sec.
+    Max Memory :                                 48 MB
+    Average Memory :                             48.00 MB
+    Total Requested Memory :                     3600.00 MB
+    Delta Memory :                               3552.00 MB
+    Max Swap :                                   294 MB
+    Max Processes :                              4
+    Max Threads :                                5
+
+The output (if any) is above this job summary.
+
+Executing baton command: jq -n '{"collection": "/seq", "avus": [{"attribute": "target", "value": "1"}, {"attribute": "study_id", "value": "4327"}, {"attribute": "tag_index", "value": "43"}, {"attribute": "lane", "value": "1"}]}' | baton-metaquery --avu
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@bc-29-2-13>
+Subject: Job 5950723: </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.065f34ce/snakejob.irods_metadata.0.sh> in cluster <farm3> Done
+
+Job </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.065f34ce/snakejob.irods_metadata.0.sh> was submitted from host <farm3-head5> by user <ge2> in cluster <farm3>.
+Job was executed on host(s) <5*bc-29-2-13>, in queue <normal>, as user <ge2> in cluster <farm3>.
+</nfs/users/nfs_g/ge2> was used as the home directory.
+</nfs/users/nfs_g/ge2/software/sc_snakemake> was used as the working directory.
+Started at Fri Oct 21 11:17:27 2016
+Results reported on Fri Oct 21 11:17:30 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+/nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.065f34ce/snakejob.irods_metadata.0.sh
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.06 sec.
+    Max Memory :                                 44 MB
+    Average Memory :                             44.00 MB
+    Total Requested Memory :                     3600.00 MB
+    Delta Memory :                               3556.00 MB
+    Max Swap :                                   341 MB
+    Max Processes :                              6
+    Max Threads :                                7
+
+The output (if any) is above this job summary.
+
+Executing baton command: jq -n '{"avus": [{"value": "1", "attribute": "target"}, {"value": "4327", "attribute": "study_id"}, {"value": "1", "attribute": "lane"}, {"value": "43", "attribute": "tag_index"}], "collection": "/seq"}' | baton-metaquery --avu
+Executing baton command: jq -n '{"directory": "data/cram", "collection": "/seq/20933", "data_object": "20933_1#43.cram"}' | baton-get --save
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@bc-29-2-13>
+Subject: Job 5950725: </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.065f34ce/snakejob.baton_query.1.sh> in cluster <farm3> Done
+
+Job </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.065f34ce/snakejob.baton_query.1.sh> was submitted from host <farm3-head5> by user <ge2> in cluster <farm3>.
+Job was executed on host(s) <5*bc-29-2-13>, in queue <normal>, as user <ge2> in cluster <farm3>.
+</nfs/users/nfs_g/ge2> was used as the home directory.
+</nfs/users/nfs_g/ge2/software/sc_snakemake> was used as the working directory.
+Started at Fri Oct 21 11:17:27 2016
+Results reported on Fri Oct 21 11:17:34 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+/nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.065f34ce/snakejob.baton_query.1.sh
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.10 sec.
+    Max Memory :                                 44 MB
+    Average Memory :                             44.00 MB
+    Total Requested Memory :                     3600.00 MB
+    Delta Memory :                               3556.00 MB
+    Max Swap :                                   341 MB
+    Max Processes :                              6
+    Max Threads :                                7
+
+The output (if any) is above this job summary.
+
+Executing baton command: baton-metaquery --avu
+Executing baton command: baton-get --save
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@bc-30-3-15>
+Subject: Job 5953403: </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.43274oa7/snakejob.baton_query.0.sh> in cluster <farm3> Done
+
+Job </nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.43274oa7/snakejob.baton_query.0.sh> was submitted from host <farm3-head5> by user <ge2> in cluster <farm3>.
+Job was executed on host(s) <5*bc-30-3-15>, in queue <normal>, as user <ge2> in cluster <farm3>.
+</nfs/users/nfs_g/ge2> was used as the home directory.
+</nfs/users/nfs_g/ge2/software/sc_snakemake> was used as the working directory.
+Started at Fri Oct 21 11:29:17 2016
+Results reported on Fri Oct 21 11:29:24 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+/nfs/users/nfs_g/ge2/software/sc_snakemake/.snakemake/tmp.43274oa7/snakejob.baton_query.0.sh
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.14 sec.
+    Max Memory :                                 48 MB
+    Average Memory :                             48.00 MB
+    Total Requested Memory :                     3600.00 MB
+    Delta Memory :                               3552.00 MB
+    Max Swap :                                   294 MB
+    Max Processes :                              4
+    Max Threads :                                5
+
+The output (if any) is above this job summary.
+

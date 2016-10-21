@@ -2,18 +2,29 @@ import os
 from utils.parse import read_quants, read_qcs
 
 variables = glob_wildcards(os.path.join(config['cram_folder'], config['pattern'] + '.cram'))
+# print(variables.run)
+# print(variables.lane)
+# print(variables.tag_index)
+print(len(variables.run))
+print(len(variables.lane))
+print(len(variables.tag_index))
+
+def generate_filenames(runs, lanes, tag_indexes, folder,  pattern, suffix):
+    filenames = []
+    for i in range(len(runs)):
+        filename = (pattern + suffix).format(run=runs[i], lane=lanes[i], 
+                                             tag_index=tag_indexes[i])
+        filenames.append(os.path.join(folder, filename))
+    return filenames
 
 rule all:
     input:
-        expand(os.path.join(config["fastq_folder"],
-                            config['pattern'] + "_forward.fastq"),
-               run=variables.run, lane=variables.lane, 
-               tag_index=variables.tag_index),
-        expand(os.path.join(config["fastq_folder"],
-                            config['pattern'] + "_reverse.fastq"),
-               run=variables.run, lane=variables.lane,
-               tag_index=variables.tag_index),
-
+        generate_filenames(variables.run, variables.lane, variables.tag_index,
+                           config['fastq_folder'], 
+                           config['pattern'], "_forward.fastq"),
+        generate_filenames(variables.run, variables.lane, variables.tag_index,
+                           config['fastq_folder'], 
+                           config['pattern'], "_reverse.fastq")
 
 rule convert_fastq:
     input:

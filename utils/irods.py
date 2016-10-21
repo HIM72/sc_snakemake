@@ -22,8 +22,7 @@ class Collection(object):
         return {"collection": "/seq",
                 "avus": [{"attribute": "target", "value": "1"},
                          {"attribute": "study_id", "value": "%s" % self.study_id}]}
-
-#{"attribute": "type", "value": "cram"},
+                        #{"attribute": "type", "value": "cram"},
 
     def _convert_avus(self, avus):
         return {a['attribute']: a['value'] for a in avus}
@@ -33,12 +32,12 @@ class Collection(object):
             query = copy.deepcopy(self.base_query)
         for key, value in six.iteritems(avus):
             if value is not None:
-                query["avus"].append({"attribute": key, "value": value})
+                query["avus"].append({"attribute": key, "value": str(value)})
         return "jq -n '%s' | %s" % (json.dumps(query), baton_command)
 
     def execute_baton(self, baton_command, query=None, **avus):
         command = self.create_query(baton_command, query=query, **avus)
-        print("Executing baton command: %s" % command)
+        print("Executing baton command: %s" % baton_command)
         try:
             result = subprocess.getoutput(command)
             try:
@@ -109,12 +108,17 @@ class Collection(object):
         else:
             return
 
-    def get_collection_metadata(self):
-        data_objects = self.execute_baton('baton-metaquery --avu')
-        for data_object in data_objects:
-            data_object['avus'] = self._convert_avus(data_object['avus'])
+    def get_collection_metadata(self, id_run=None, lane=None, tag_index=None):
+        data_objects = self.execute_baton(
+            'baton-metaquery --avu', id_run=id_run,
+            lane=lane, tag_index=tag_index)
+        if data_objects:
+            for data_object in data_objects:
+                data_object['avus'] = self._convert_avus(data_object['avus'])
 
-        return data_objects
+            return data_objects
+        else:
+            return []
 
 
 if __name__ == '__main__':
