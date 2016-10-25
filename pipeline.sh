@@ -5,8 +5,10 @@ DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Defaults
 config="${DIR}/config.json"
-memory=3600
+memory=36000
 ncores=5
+do_preprocessing=true
+do_irods=true
 
 # Keyword arguments
 while [[ $# -gt 1 ]]
@@ -26,6 +28,14 @@ do
             ncores="$2"
             shift
         ;;
+        -sp|--skip-preprocessing)
+            do_preprocessing=false
+            shift
+        ;;
+        -si|--skip-irods)
+            do_irods=false
+            shift
+        ;;
         *)
         ;;
     esac
@@ -35,7 +45,24 @@ done
 # Compile bsub command
 bsub_command="bsub -M${memory} -R 'rusage[mem=${memory}] select[mem>${memory}] span[hosts=1]' -n ${ncores} -o job.log"
 
-echo $bsub_command
-
 # Collect irods
-snakemake -s ${DIR}/irods.snake  --configfile=${config} --cluster "bsub -M${memory} -R 'rusage[mem=${memory}] select[mem>${memory}] span[hosts=1]' -n ${ncores} -o job.log" --jobs 16 
+if $do_irods;
+then
+snakemake \
+    -s ${DIR}/irods.snake  \
+    --configfile=${config} \
+    --latency-wait 15 \
+    --cluster "$bsub_command" \
+    --jobs 16;
+fi
+
+# Perform the pre-processing pipeline
+if $do_preprocessing;
+then
+snakemake \
+    -s ${DIR}/Snakefile \
+    --configfile=${config} \
+    --latency-wait 15 \
+    --cluster "$bsub_command" \
+    --jobs 100;
+fi

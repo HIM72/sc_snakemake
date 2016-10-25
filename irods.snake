@@ -5,23 +5,33 @@ import json
 from pprint import pprint
 import pandas as pd
 
-query = config['query']
+# Read in query
+query = config.get('query')
+collection = Collection(config["study_id"])
+items = []
 
-# Collect metadata from irods before fetching
-collection = Collection(query['study_id'])
-items = collection.get_collection_metadata(
-    id_run=query.get('id_run'), lane=query.get('lane'),
-    tag_index=query.get('tag_index'))
+if query:
+    for run in query:
+        for lane in query[run]:
+            tag_indices = None
+            if len(query[run][lane]):
+                tag_indices = query[run][lane]
+            # Make query for the lane
+            run_lane_items = collection.get_collection_metadata(
+                id_run=run, lane=lane, tag_index=tag_indices)
+            items += run_lane_items
+else:
+    items = collection.get_collection_metadata()
 
 if not os.path.isdir(config['tmp_folder']):
     os.makedirs(config['tmp_folder'])
+
 metadata_file = os.path.join(config['tmp_folder'], 'items.json')
 with open(metadata_file, 'w') as fh:
     json.dump(items, fh)
 
 object_collection = {q['data_object']: q['collection'] for q in items}
-
-# Get list of data objects
+print(object_collection)
 
 rule all:
     input:

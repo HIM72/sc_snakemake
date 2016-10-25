@@ -32,7 +32,13 @@ class Collection(object):
             query = copy.deepcopy(self.base_query)
         for key, value in six.iteritems(avus):
             if value is not None:
-                query["avus"].append({"attribute": key, "value": str(value)})
+                if isinstance(value, list):
+                    query["avus"].append(
+                        {"attribute": key,
+                         "value": [str(v) for v in value],
+                         "operator": "in"})
+                else:
+                    query["avus"].append({"attribute": key, "value": str(value)})
         return "jq -n '%s' | %s" % (json.dumps(query), baton_command)
 
     def execute_baton(self, baton_command, query=None, **avus):
@@ -124,3 +130,4 @@ class Collection(object):
 if __name__ == '__main__':
     c = Collection(study_id=18482)
     pprint(c.get_collection_metadata()[1])
+

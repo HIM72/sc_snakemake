@@ -4,12 +4,20 @@
     "cram_folder": "data/cram",
     "fastq_folder": "data/fastq",
     "tmp_folder": "data/.tmp",
+    "lustre_folder": "/lustre/scratch109/sanger/ge2",
     "log_folder": "logs",
+    "study_id": 3324,
     "query": {
-        "study_id": 4327,
-        "lane": 1,
-        "run": 20933,
-        "tag_index": 43
+        20666: {
+            4: [42],
+            5: [42],
+            6: [1]
+        }
+    },
+    "merge": {
+        20666: [
+            [4, 5]
+        ]
     },
     "pattern": "{run}_{lane}#{tag_index}"
 }
