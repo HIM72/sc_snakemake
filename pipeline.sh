@@ -1,7 +1,18 @@
 #/usr/bin/env bash
 
 # Current Directory
-DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# DIR="$(dirname "$(readlink -f $0)" )"
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+pwd
 
 # Defaults
 config="${DIR}/config.json"
@@ -9,6 +20,7 @@ memory=36000
 ncores=5
 do_preprocessing=true
 do_irods=true
+skip_task=""
 
 # Keyword arguments
 while [[ $# -gt 1 ]]
@@ -17,6 +29,7 @@ do
 
     case $key in
         -c|--config)
+            echo "setting config"
             config="$2"
             shift
         ;;
@@ -28,12 +41,8 @@ do
             ncores="$2"
             shift
         ;;
-        -sp|--skip-preprocessing)
-            do_preprocessing=false
-            shift
-        ;;
-        -si|--skip-irods)
-            do_irods=false
+        --skip)
+            skip_task="$2"
             shift
         ;;
         *)
@@ -42,11 +51,13 @@ do
     shift
 done
 
+echo "using config ${config}"
+
 # Compile bsub command
 bsub_command="bsub -M${memory} -R 'rusage[mem=${memory}] select[mem>${memory}] span[hosts=1]' -n ${ncores} -o job.log"
 
 # Collect irods
-if $do_irods;
+if [[ "$skip_task" != "irods" ]];
 then
 snakemake \
     -s ${DIR}/irods.snake  \
@@ -57,7 +68,7 @@ snakemake \
 fi
 
 # Perform the pre-processing pipeline
-if $do_preprocessing;
+if [[ "$skip_task" != "preprocessing" ]];
 then
 snakemake \
     -s ${DIR}/Snakefile \

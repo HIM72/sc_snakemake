@@ -3,27 +3,33 @@ from utils.parse import read_quants, read_qcs
 from utils.file_control import create_file_targets
 
 # Get the metadata from irods
-metadata_file = os.path.join(config['tmp_folder'], 'items.json')
-with open(metadata_file) as fh:
-    items = json.load(fh)
+# metadata_file = os.path.join(config['tmp_folder'], 'items.json')
+# with open(metadata_file) as fh:
+#     items = json.load(fh)
 
-FASTQ_FOLDER = config['fastq_folder']
+DATA_FOLDER = config['data_folder']
+CRAM_FOLDER = config.get('cram_folder', os.path.join(DATA_FOLDER, 'cram'))
+FASTQ_FOLDER = config.get('fastq_folder', os.path.join(DATA_FOLDER, 'fastq'))
+RESULTS_FOLDER = config.get('results_folder', 
+                            os.path.join(DATA_FOLDER, 'results'))
+LOG_FOLDER = config.get('log_folder', os.path.join(DATA_FOLDER, 'logs'))
+TEMP_FOLDER = config.get('tmp_folder', os.path.join(DATA_FOLDER, '.tmp'))
+
 LUSTRE = config['lustre_folder']
-RESULTS_FOLDER = config['results_folder']
-CRAM_FOLDER = config['cram_folder']
-LOG_FOLDER = config['log_folder']
 
 # item_dict = {q['data_object']: q['avus'] for q in items]}
 merge_mapper = {}
-glob_variables = glob_wildcards(os.path.join(config['cram_folder'], 
-                           config['pattern'] + '.cram'))
+glob_pattern = os.path.join(CRAM_FOLDER, config['pattern'] + '.cram')
+glob_variables = glob_wildcards(glob_pattern)
 
-final_samples, merge_mapper = create_file_targets(glob_variables, config)
+original_samples, final_samples, merge_mapper = create_file_targets(
+    glob_variables, config)
 
 rule all:
     input:
         os.path.join(RESULTS_FOLDER, "results", "tpm.csv"),
         os.path.join(RESULTS_FOLDER, "qc", "multiqc_salmon", "multiqc_report.html"),
+        os.path.join(RESULTS_FOLDER, "qc", "multiqc_fastqc", "multiqc_report.html"),
         os.path.join(RESULTS_FOLDER, "qc", "salmon_qc.csv")
 
 rule multiqc_salmon:
@@ -147,6 +153,37 @@ rule merge_forward:
             LOG_FOLDER, "merge", "{sample}.log".format(sample=wildcards.sample))
     shell:
         "cat {input} > {output}"
+
+rule multiqc_fastqc:
+    input:
+        lambda wildcards: 
+            expand(os.path.join(TEMP_FOLDER, "fastqc", 
+                                "{original_sample}_{direction}_fastqc.zip"),
+                original_sample=original_samples, 
+                direction=["forward", "reverse"])
+    output:
+        expand(os.path.join(RESULTS_FOLDER, "qc", "multiqc_fastqc",
+                            "multiqc_report.html"))
+    params:
+        fastqc_folder=lambda x: os.path.join(TEMP_FOLDER, "fastqc"),
+        multiqc_folder=lambda x: os.path.join(RESULTS_FOLDER, "qc",
+                                              "multiqc_fastqc")
+    shell:
+        "multiqc {params.fastqc_folder} -o {params.multiqc_folder}"
+
+rule fastqc:
+    input:
+        forward=os.path.join(FASTQ_FOLDER, "{original_sample}_forward.fastq"),
+        reverse=os.path.join(FASTQ_FOLDER, "{original_sample}_reverse.fastq")
+    output:
+        temp(os.path.join(TEMP_FOLDER, "fastqc", 
+                          "{original_sample}_forward_fastqc.zip")),
+        temp(os.path.join(TEMP_FOLDER, "fastqc", 
+                          "{original_sample}_reverse_fastqc.zip"))
+    params:
+        out_dir=lambda wildcards: os.path.join(TEMP_FOLDER, "fastqc")
+    shell:
+        "fastqc -o {params.out_dir} {input.forward} {input.reverse}"
 
 rule convert_fastq:
     input:
