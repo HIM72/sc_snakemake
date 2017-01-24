@@ -29,7 +29,7 @@ rule all:
     input:
         os.path.join(RESULTS_FOLDER, "results", "tpm.csv"),
         os.path.join(RESULTS_FOLDER, "qc", "multiqc_salmon", "multiqc_report.html"),
-        os.path.join(RESULTS_FOLDER, "qc", "multiqc_fastqc", "multiqc_report.html"),
+        # os.path.join(RESULTS_FOLDER, "qc", "multiqc_fastqc", "multiqc_report.html"),
         os.path.join(RESULTS_FOLDER, "qc", "salmon_qc.csv")
 
 rule multiqc_salmon:

@@ -1,11 +1,10 @@
 def create_file_targets(variables, config):
 
-    merge_config = config["merge"]
+    merge_config = config.get("merge", {})
 
     merge_mapper = {}
     original_lane_mapper = {}
     final_samples = []
-    run_lanes = []
     run_merged_lane = {}
     unmerged_samples = []
     original_samples = []
@@ -20,13 +19,11 @@ def create_file_targets(variables, config):
             run_merged_lane[str(run)] += merge
             new_lane = "{run}_{lane1}-{lane2}".format(
                 run=run, lane1=merge[0], lane2=merge[1])
-            run_lanes.append(new_lane)
             run_lane1 = "{run}_{lane}".format(run=run, lane=merge[0])
             run_lane2 = "{run}_{lane}".format(run=run, lane=merge[1])
             original_lane_mapper[run_lane1] = [merge[0], merge[1]]
             original_lane_mapper[run_lane2] = [merge[0], merge[1]]
 
-    print(run_lanes)
     # Run through all the runs, lanes and tags found in the cram folder
     for i in range(len(variables.run)):
         run, lane, tag_index = (
@@ -37,26 +34,26 @@ def create_file_targets(variables, config):
         original_samples.append(original_sample_name)
         all_samples.append(original_sample_name)
 
-        if lane not in run_merged_lane[run]:
-            if run_lane not in run_lanes:
-                run_lanes.append(run_lane)
-            # merge_mapper[sample_name] = [original_sample_name, None]
+        if run not in run_merged_lane:
             unmerged_samples.append(original_sample_name)
         else:
-            lane1 = original_lane_mapper[run_lane][0]
-            lane2 = original_lane_mapper[run_lane][1]
-            # Get the new sample name
-            merged_lane = "{run}_{lane1}-{lane2}".format(
-                run=run, lane1=lane1, lane2=lane2)
-            sample_name = "{run_lane}#{tag_index}".format(
-                run_lane=merged_lane, tag_index=tag_index)
+            if lane not in run_merged_lane[run]:
+                unmerged_samples.append(original_sample_name)
+            else:
+                lane1 = original_lane_mapper[run_lane][0]
+                lane2 = original_lane_mapper[run_lane][1]
+                # Get the new sample name
+                merged_lane = "{run}_{lane1}-{lane2}".format(
+                    run=run, lane1=lane1, lane2=lane2)
+                sample_name = "{run_lane}#{tag_index}".format(
+                    run_lane=merged_lane, tag_index=tag_index)
 
-            # Map the old sample names for the merge
-            original_sample1 = config["pattern"].format(
-                run=run, lane=lane1, tag_index=tag_index)
-            original_sample2 = config["pattern"].format(
-                run=run, lane=lane2, tag_index=tag_index)
-            merge_mapper[sample_name] = [original_sample1, original_sample2]
+                # Map the old sample names for the merge
+                original_sample1 = config["pattern"].format(
+                    run=run, lane=lane1, tag_index=tag_index)
+                original_sample2 = config["pattern"].format(
+                    run=run, lane=lane2, tag_index=tag_index)
+                merge_mapper[sample_name] = [original_sample1, original_sample2]
 
     # Look for missing files
     final_merge_mapper = {}

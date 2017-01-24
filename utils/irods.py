@@ -43,7 +43,7 @@ class Collection(object):
 
     def execute_baton(self, baton_command, query=None, **avus):
         command = self.create_query(baton_command, query=query, **avus)
-        print("Executing baton command: %s" % baton_command)
+        print("Executing baton command: %s" % command)
         try:
             result = subprocess.getoutput(command)
             try:

@@ -12,48 +12,59 @@ items = []
 
 if query:
     for run in query:
-        for lane in query[run]:
-            tag_indices = None
-            if len(query[run][lane]):
-                tag_indices = query[run][lane]
-            # Make query for the lane
-            run_lane_items = collection.get_collection_metadata(
-                id_run=run, lane=lane, tag_index=tag_indices)
+        if len(query[run].keys()):
+            for lane in query[run]:
+                tag_indices = None
+                if len(query[run][lane]):
+                    tag_indices = query[run][lane]
+                # Make query for the lane
+                run_lane_items = collection.get_collection_metadata(
+                    id_run=run, lane=lane, tag_index=tag_indices)
+                items += run_lane_items
+        else:
+            run_lane_items = collection.get_collection_metadata(id_run=run)
             items += run_lane_items
 else:
     items = collection.get_collection_metadata()
 
-if not os.path.isdir(config['tmp_folder']):
-    os.makedirs(config['tmp_folder'])
+DATA_FOLDER = config.get('data_folder')
+TMP_FOLDER = config.get('tmp_folder',
+                        os.path.join(config['data_folder'], '.tmp'))
+CRAM_FOLDER = config.get('cram_folder',
+                         os.path.join(config['data_folder'], 'cram'))
+LOG_FOLDER = config.get('log_folder',
+                        os.path.join(config['data_folder'], 'log'))
 
-metadata_file = os.path.join(config['tmp_folder'], 'items.json')
+if not os.path.isdir(TMP_FOLDER):
+    os.makedirs(TMP_FOLDER)
+
+metadata_file = os.path.join(TMP_FOLDER, 'items.json')
 with open(metadata_file, 'w') as fh:
     json.dump(items, fh)
 
 object_collection = {q['data_object']: q['collection'] for q in items}
-print(object_collection)
 
 rule all:
     input:
-        expand(os.path.join(config['cram_folder'], '{sample}'),
+        expand(os.path.join(CRAM_FOLDER, '{sample}'),
                sample=[query['data_object'] for query in items]),
-        os.path.join(config['tmp_folder'], "irods_metadata.csv")
+        os.path.join(DATA_FOLDER, "metadata", "irods_metadata.csv")
 
 rule baton_query:
     output:
-        os.path.join(config['cram_folder'], '{sample}')
+        os.path.join(CRAM_FOLDER, '{sample}')
     log:
-        os.path.join(config['log_folder'], "irods", "{sample}.log")
+        os.path.join(LOG_FOLDER, "irods", "{sample}.log")
     run:
         collection.execute_baton(
             'baton-get --save', 
             query={'collection': object_collection[wildcards.sample],
                    'data_object': wildcards.sample,
-                   'directory': config['cram_folder']})
+                   'directory': CRAM_FOLDER})
 
 rule irods_metadata:
     output:
-        os.path.join(config['tmp_folder'], "irods_metadata.csv")
+        os.path.join(DATA_FOLDER, "metadata", "irods_metadata.csv")
     run:
         index_metadata = {item['data_object']: item['avus'] for item in items}
         df = pd.DataFrame.from_dict(index_metadata, orient='index')
