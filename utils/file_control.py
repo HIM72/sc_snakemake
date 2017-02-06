@@ -1,3 +1,5 @@
+import re
+
 def create_file_targets(variables, config):
 
     merge_config = config.get("merge", {})
@@ -29,16 +31,31 @@ def create_file_targets(variables, config):
         run, lane, tag_index = (
             variables.run[i], variables.lane[i], variables.tag_index[i])
         run_lane = str(run) + "_" + str(lane)
-        original_sample_name = config["pattern"].format(
-            run=run, lane=lane, tag_index=tag_index)
-        original_samples.append(original_sample_name)
+        direction = getattr(variables, 'direction', None)
+        if direction:
+            new_pattern = re.search('(.*).{direction}',
+                                    config['pattern']).groups(1)[0]
+            direction = variables.direction[i]
+            original_sample_name = new_pattern.format(
+                run=run, lane=lane, tag_index=tag_index,
+                direction=direction)
+            unmerged_sample_name = new_pattern.format(
+                run=run, lane=lane, tag_index=tag_index,
+                direciton=direction)
+        else:
+            original_sample_name = config["pattern"].format(
+                run=run, lane=lane, tag_index=tag_index)
+            unmerged_sample_name = config["pattern"].format(
+                run=run, lane=lane, tag_index=tag_index)
         all_samples.append(original_sample_name)
+        original_samples.append(unmerged_sample_name)
 
         if run not in run_merged_lane:
-            unmerged_samples.append(original_sample_name)
+            # unmerged_samples.append(original_sample_name)
+            unmerged_samples.append(unmerged_sample_name)
         else:
             if lane not in run_merged_lane[run]:
-                unmerged_samples.append(original_sample_name)
+                unmerged_samples.append(unmerged_sample_name)
             else:
                 lane1 = original_lane_mapper[run_lane][0]
                 lane2 = original_lane_mapper[run_lane][1]
@@ -48,12 +65,29 @@ def create_file_targets(variables, config):
                 sample_name = "{run_lane}#{tag_index}".format(
                     run_lane=merged_lane, tag_index=tag_index)
 
-                # Map the old sample names for the merge
-                original_sample1 = config["pattern"].format(
+                sample1 = "{run}_{lane}#{tag_index}".format(
                     run=run, lane=lane1, tag_index=tag_index)
-                original_sample2 = config["pattern"].format(
+                sample2 = "{run}_{lane}#{tag_index}".format(
                     run=run, lane=lane2, tag_index=tag_index)
-                merge_mapper[sample_name] = [original_sample1, original_sample2]
+                merge_mapper[sample_name] = [sample1, sample2]
+
+                # Map the old sample names for the merge
+                # if direction:
+                #     original_sample1 = config["pattern"].format(
+                #         run=run, lane=lane1, tag_index=tag_index,
+                #         direction=direction)
+                #     original_sample2 = config["pattern"].format(
+                #         run=run, lane=lane2, tag_index=tag_index,
+                #         direction=direction)
+                #     merge_mapper[sample_name] = [original_sample1,
+                #                                  original_sample2]
+                # else:
+                #     original_sample1 = config["pattern"].format(
+                #         run=run, lane=lane1, tag_index=tag_index)
+                #     original_sample2 = config["pattern"].format(
+                #         run=run, lane=lane2, tag_index=tag_index)
+                #     merge_mapper[sample_name] = [original_sample1,
+                #                                  original_sample2]
 
     # Look for missing files
     final_merge_mapper = {}
@@ -68,5 +102,4 @@ def create_file_targets(variables, config):
     final_samples = list(final_merge_mapper.keys()) + unmerged_samples
 
     return original_samples, final_samples, final_merge_mapper
-
 

@@ -16,6 +16,7 @@ pwd
 
 # Defaults
 config="${DIR}/config.json"
+cluster_config="${DIR}/cluster.json"
 memory=36000
 ncores=5
 do_preprocessing=true
@@ -54,7 +55,7 @@ done
 echo "using config ${config}"
 
 # Compile bsub command
-bsub_command="bsub -M${memory} -R 'rusage[mem=${memory}] select[mem>${memory}] span[hosts=1]' -n ${ncores} -o job.log"
+bsub_command="bsub -M{cluster.memory} -R 'rusage[mem={cluster.memory}] select[mem>{cluster.memory}] span[hosts=1]' -n {cluster.n} -o job.log"
 irods_bsub_cmd="bsub -M4000 -R 'rusage[mem=4000] select[mem>4000] span[hosts=1]' -n 1 -o job.log"
 
 # Collect irods
@@ -76,5 +77,6 @@ snakemake \
     --configfile=${config} \
     --latency-wait 15 \
     --cluster "$bsub_command" \
+    --cluster-config ${cluster_config} \
     --jobs 100;
 fi

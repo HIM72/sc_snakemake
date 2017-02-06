@@ -55,6 +55,8 @@ rule baton_query:
         os.path.join(CRAM_FOLDER, '{sample}')
     log:
         os.path.join(LOG_FOLDER, "irods", "{sample}.log")
+    params:
+        ncores=1
     run:
         collection.execute_baton(
             'baton-get --save', 
@@ -65,6 +67,8 @@ rule baton_query:
 rule irods_metadata:
     output:
         os.path.join(DATA_FOLDER, "metadata", "irods_metadata.csv")
+    params:
+        ncores=1
     run:
         index_metadata = {item['data_object']: item['avus'] for item in items}
         df = pd.DataFrame.from_dict(index_metadata, orient='index')

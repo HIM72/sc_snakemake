@@ -2,11 +2,6 @@ import os
 from utils.parse import read_quants, read_qcs
 from utils.file_control import create_file_targets
 
-# Get the metadata from irods
-# metadata_file = os.path.join(config['tmp_folder'], 'items.json')
-# with open(metadata_file) as fh:
-#     items = json.load(fh)
-
 DATA_FOLDER = config['data_folder']
 CRAM_FOLDER = config.get('cram_folder', os.path.join(DATA_FOLDER, 'cram'))
 FASTQ_FOLDER = config.get('fastq_folder', os.path.join(DATA_FOLDER, 'fastq'))
@@ -14,12 +9,17 @@ RESULTS_FOLDER = config.get('results_folder',
                             os.path.join(DATA_FOLDER, 'results'))
 LOG_FOLDER = config.get('log_folder', os.path.join(DATA_FOLDER, 'logs'))
 TEMP_FOLDER = config.get('tmp_folder', os.path.join(DATA_FOLDER, '.tmp'))
+FROM = config.get('from', 'cram')
+REVERSE = config.get('reverse', 'reverse')
+FORWARD = config.get('forward', 'forward')
 
 LUSTRE = config['lustre_folder']
 
-# item_dict = {q['data_object']: q['avus'] for q in items]}
 merge_mapper = {}
-glob_pattern = os.path.join(CRAM_FOLDER, config['pattern'] + '.cram')
+if FROM == 'cram':
+    glob_pattern = os.path.join(CRAM_FOLDER, config['pattern'] + '.cram')
+elif FROM == 'fastq':
+    glob_pattern = os.path.join(FASTQ_FOLDER, config['pattern'] + '.fastq')
 glob_variables = glob_wildcards(glob_pattern)
 
 original_samples, final_samples, merge_mapper = create_file_targets(
@@ -84,8 +84,8 @@ rule read_tpm:
 
 rule quantify:
     input:
-        forward=os.path.join(LUSTRE, "{sample}_forward.fastq"),
-        reverse=os.path.join(LUSTRE, "{sample}_reverse.fastq")
+        forward=os.path.join(LUSTRE, "{sample}_" + FORWARD + ".fastq"),
+        reverse=os.path.join(LUSTRE, "{sample}_" + REVERSE + ".fastq")
     output:
         os.path.join(RESULTS_FOLDER, "quant", "{sample}", "quant.genes.sf")
     log:
@@ -93,7 +93,8 @@ rule quantify:
             LOG_FOLDER, "salmon", "{sample}.log".format(sample=wildcards.sample))
     params:
         out_folder=lambda wildcards: os.path.join(RESULTS_FOLDER, "quant",
-                                                  wildcards.sample)
+                                                  wildcards.sample),
+        index=config['index']
     shell:
         "salmon quant -i /nfs/team205/.scapi/references/human/salmon_index "
         "-g /nfs/team205/.scapi/references/human/human_gene_map.txt "
@@ -104,9 +105,10 @@ rule copy_unmerged_forward:
     input:
         lambda wildcards: os.path.join(
             FASTQ_FOLDER,
-            "{sample}_forward.fastq".format(sample=wildcards.sample))
+            "{sample}_{direction}.fastq".format(sample=wildcards.sample,
+                                                direction=FORWARD))
     output:
-        temp(os.path.join(LUSTRE, "{sample}_forward.fastq"))
+        temp(os.path.join(LUSTRE, "{sample}_" + FORWARD + ".fastq"))
     shell:
         "cp {input} {output}"
 
@@ -114,9 +116,10 @@ rule copy_unmerged_reverse:
     input:
         lambda wildcards: os.path.join(
             FASTQ_FOLDER,
-            "{sample}_reverse.fastq".format(sample=wildcards.sample))
+            "{sample}_{direction}.fastq".format(sample=wildcards.sample,
+                                                direction=REVERSE))
     output:
-        temp(os.path.join(LUSTRE, "{sample}_reverse.fastq"))
+        temp(os.path.join(LUSTRE, "{sample}_" + REVERSE + ".fastq"))
     shell:
         "cp {input} {output}"
 
@@ -124,13 +127,15 @@ rule merge_reverse:
     input:
         lambda wildcards: [
             os.path.join(FASTQ_FOLDER, 
-                         "{original_sample}_reverse.fastq".format(
-                           original_sample=merge_mapper[wildcards.sample][0])),
+                         "{original_sample}_{direction}.fastq".format(
+                           original_sample=merge_mapper[wildcards.sample][0],
+                           direction=REVERSE)),
             os.path.join(FASTQ_FOLDER, 
-                         "{original_sample}_reverse.fastq".format(
-                           original_sample=merge_mapper[wildcards.sample][1]))]
+                         "{original_sample}_{direction}.fastq".format(
+                           original_sample=merge_mapper[wildcards.sample][1],
+                           direction=REVERSE))]
     output:
-        temp(os.path.join(LUSTRE, "{sample}_reverse.fastq"))
+        temp(os.path.join(LUSTRE, "{sample}_" + REVERSE + "fastq"))
     log:
         lambda wildcards: os.path.join(
             LOG_FOLDER, "merge", "{sample}.log".format(sample=wildcards.sample))
@@ -141,13 +146,15 @@ rule merge_forward:
     input:
         lambda wildcards: [
             os.path.join(
-                FASTQ_FOLDER, "{original_sample}_forward.fastq".format(
-                    original_sample=merge_mapper[wildcards.sample][0])),
+                FASTQ_FOLDER, "{original_sample}_{direction}.fastq".format(
+                    original_sample=merge_mapper[wildcards.sample][0],
+                    direction=FORWARD)),
             os.path.join(
-                FASTQ_FOLDER, "{original_sample}_forward.fastq".format(
-                    original_sample=merge_mapper[wildcards.sample][1]))]
+                FASTQ_FOLDER, "{original_sample}_{direction}.fastq".format(
+                    original_sample=merge_mapper[wildcards.sample][1],
+                    direction=FORWARD))]
     output:
-        temp(os.path.join(LUSTRE, "{sample}_forward.fastq"))
+        temp(os.path.join(LUSTRE, "{sample}_" + FORWARD + ".fastq"))
     log:
         lambda wildcards: os.path.join(
             LOG_FOLDER, "merge", "{sample}.log".format(sample=wildcards.sample))
@@ -160,7 +167,7 @@ rule multiqc_fastqc:
             expand(os.path.join(TEMP_FOLDER, "fastqc", 
                                 "{original_sample}_{direction}_fastqc.zip"),
                 original_sample=original_samples, 
-                direction=["forward", "reverse"])
+                direction=[FORWARD, REVERSE])
     output:
         expand(os.path.join(RESULTS_FOLDER, "qc", "multiqc_fastqc",
                             "multiqc_report.html"))
@@ -173,13 +180,17 @@ rule multiqc_fastqc:
 
 rule fastqc:
     input:
-        forward=os.path.join(FASTQ_FOLDER, "{original_sample}_forward.fastq"),
-        reverse=os.path.join(FASTQ_FOLDER, "{original_sample}_reverse.fastq")
+        forward=os.path.join(
+            FASTQ_FOLDER, "{original_sample}_" + FORWARD + ".fastq"),
+        reverse=os.path.join(
+            FASTQ_FOLDER, "{original_sample}_" + REVERSE + ".fastq")
     output:
-        temp(os.path.join(TEMP_FOLDER, "fastqc", 
-                          "{original_sample}_forward_fastqc.zip")),
-        temp(os.path.join(TEMP_FOLDER, "fastqc", 
-                          "{original_sample}_reverse_fastqc.zip"))
+        temp(os.path.join(
+            TEMP_FOLDER, "fastqc", 
+            "{original_sample}_" + FORWARD + "_fastqc.zip")),
+        temp(os.path.join(
+            TEMP_FOLDER, "fastqc", 
+            "{original_sample}_" + REVERSE + "_fastqc.zip"))
     params:
         out_dir=lambda wildcards: os.path.join(TEMP_FOLDER, "fastqc")
     shell:
@@ -191,8 +202,10 @@ rule convert_fastq:
             os.path.join(CRAM_FOLDER, "{original_sample}.cram".format(
                 original_sample=wildcards.original_sample))]
     output:
-        forward=os.path.join(FASTQ_FOLDER, "{original_sample}_forward.fastq"),
-        reverse=os.path.join(FASTQ_FOLDER, "{original_sample}_reverse.fastq")
+        forward=os.path.join(
+            FASTQ_FOLDER, "{original_sample}_" + FORWARD + ".fastq"),
+        reverse=os.path.join(
+            FASTQ_FOLDER, "{original_sample}_" + REVERSE + ".fastq"),
     log:
         os.path.join(LOG_FOLDER, "fastq_conversion", "{original_sample}.log")
     shell:
