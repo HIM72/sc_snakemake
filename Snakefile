@@ -28,9 +28,10 @@ original_samples, final_samples, merge_mapper = create_file_targets(
 rule all:
     input:
         os.path.join(RESULTS_FOLDER, "results", "tpm.csv"),
-        os.path.join(RESULTS_FOLDER, "qc", "multiqc_salmon", "multiqc_report.html"),
-        # os.path.join(RESULTS_FOLDER, "qc", "multiqc_fastqc", "multiqc_report.html"),
+        os.path.join(RESULTS_FOLDER, "results", "counts.csv"),
         os.path.join(RESULTS_FOLDER, "qc", "salmon_qc.csv")
+        # os.path.join(RESULTS_FOLDER, "qc", "multiqc_salmon", "multiqc_report.html"),
+        # os.path.join(RESULTS_FOLDER, "qc", "multiqc_fastqc", "multiqc_report.html"),
 
 rule multiqc_salmon:
     input:
@@ -62,12 +63,12 @@ rule read_reads:
         expand(os.path.join(RESULTS_FOLDER, "quant", "{sample}", 
                "quant.genes.sf"), sample=final_samples)
     output:
-        os.path.join(RESULTS_FOLDER, "results", "reads.csv")
+        os.path.join(RESULTS_FOLDER, "results", "counts.csv")
     log:
         os.path.join(LOG_FOLDER, "parsing", "reads.log")
     run:
         results = read_quants(os.path.join(RESULTS_FOLDER, "quant", "*"), 
-                              cols=["NumReads"])
+                              col="NumReads")
         results.to_csv(output[0])
 
 rule read_tpm:
@@ -94,12 +95,14 @@ rule quantify:
     params:
         out_folder=lambda wildcards: os.path.join(RESULTS_FOLDER, "quant",
                                                   wildcards.sample),
-        index=config['index']
+        index=config['index'],
+        gene_map=config['gene_map']
     shell:
-        "salmon quant -i /nfs/team205/.scapi/references/human/salmon_index "
-        "-g /nfs/team205/.scapi/references/human/human_gene_map.txt "
-        "-l IU -1 {input.forward} -2 {input.reverse} -o "
-        "{params.out_folder}"
+        "salmon quant -i {params.index} "
+        "-g {params.gene_map} "
+        "-l IU "
+        "-1 {input.forward} -2 {input.reverse} "
+        "-o {params.out_folder}"
 
 rule copy_unmerged_forward:
     input:
@@ -135,7 +138,7 @@ rule merge_reverse:
                            original_sample=merge_mapper[wildcards.sample][1],
                            direction=REVERSE))]
     output:
-        temp(os.path.join(LUSTRE, "{sample}_" + REVERSE + "fastq"))
+        temp(os.path.join(LUSTRE, "{sample}_" + REVERSE + ".fastq"))
     log:
         lambda wildcards: os.path.join(
             LOG_FOLDER, "merge", "{sample}.log".format(sample=wildcards.sample))

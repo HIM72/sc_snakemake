@@ -50,7 +50,7 @@ def read_kallisto(sample_path):
     return df['TPM']
 
 
-def read_salmon(sample_path, isoforms=False, version='0.6.0'):
+def read_salmon(sample_path, isoforms=False, version='0.6.0', col='TPM'):
     ''' Function for reading a Salmon quantification result.
 
     Parameters
@@ -75,18 +75,18 @@ def read_salmon(sample_path, isoforms=False, version='0.6.0'):
     read_kwargs = {
         '0.6.0': {
             'engine': 'c',
-            'usecols': ['Name', 'TPM'],
+            'usecols': ['Name', col],
             'index_col': 0,
-            'dtype': {'Name': np.str, 'TPM': np.float64}
+            'dtype': {'Name': np.str, col: np.float64}
         },
         '0.4.0': {
             'engine': 'c',
             'comment': '#',
             'header': None,
-            'names': ['Name', 'length', 'TPM', 'NumReads'],
-            'usecols': ['Name', 'TPM'],
+            'names': ['Name', 'length', col, 'NumReads'],
+            'usecols': ['Name', col],
             'index_col': 0,
-            'dtype': {'Name': np.str, 'TPM': np.float64}
+            'dtype': {'Name': np.str, col: np.float64}
         }
     }
 
@@ -97,7 +97,7 @@ def read_salmon(sample_path, isoforms=False, version='0.6.0'):
         df = pd.read_table(quant_file, **read_kwargs[version])
 
         df = df.rename(columns={'Name': 'target_id'})
-        return df['TPM']
+        return df[col]
 
 
 def read_cufflinks(sample_path, isoforms=False):

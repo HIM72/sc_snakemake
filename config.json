@@ -4,8 +4,10 @@
     "cram_folder": "data/cram",
     "fastq_folder": "data/fastq",
     "tmp_folder": "data/.tmp",
-    "lustre_folder": "/lustre/scratch109/sanger/ge2",
+    "lustre_folder": "/lustre/scratch117/cellgen/team205/pipelines",
     "log_folder": "logs",
+    "index": "/nfs/team205/.scapi/references/human/salmon_index",
+    "gene_map": "/nfs/team205/.scapi/references/human/human_gene_map.txt",
     "study_id": 3324,
     "query": {
         20666: {
