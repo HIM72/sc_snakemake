@@ -56,26 +56,28 @@ echo "using config ${config}"
 
 # Compile bsub command
 bsub_command="bsub -M{cluster.memory} -R 'rusage[mem={cluster.memory}] select[mem>{cluster.memory}] span[hosts=1]' -n {cluster.n} -o job.log"
-irods_bsub_cmd="bsub -M4000 -R 'rusage[mem=4000] select[mem>4000] span[hosts=1]' -n 1 -o job.log"
+irods_bsub_cmd="bsub -M16000 -R 'rusage[mem=16000] select[mem>16000] span[hosts=1]' -n 1 -o job.log"
 
 # Collect irods
 if [[ "$skip_task" != "irods" ]];
 then
+echo "Collecting iRODS data"
 snakemake \
     -s ${DIR}/irods.snake  \
     --configfile=${config} \
-    --latency-wait 15 \
-    --cluster "$irods_bsub_command" \
+    --latency-wait 30 \
+    --cluster "$irods_bsub_cmd" \
     --jobs 16;
 fi
 
 # Perform the pre-processing pipeline
 if [[ "$skip_task" != "preprocessing" ]];
 then
+echo "Preprocessing"
 snakemake \
     -s ${DIR}/Snakefile \
     --configfile=${config} \
-    --latency-wait 15 \
+    --latency-wait 30 \
     --cluster "$bsub_command" \
     --cluster-config ${cluster_config} \
     --jobs 100;
