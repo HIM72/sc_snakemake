@@ -65,7 +65,7 @@ echo "Collecting iRODS data"
 snakemake \
     -s ${DIR}/irods.snake  \
     --configfile=${config} \
-    --latency-wait 30 \
+    --latency-wait 100 \
     --cluster "$irods_bsub_cmd" \
     --jobs 16;
 fi
@@ -77,7 +77,7 @@ echo "Preprocessing"
 snakemake \
     -s ${DIR}/Snakefile \
     --configfile=${config} \
-    --latency-wait 30 \
+    --latency-wait 100 \
     --cluster "$bsub_command" \
     --cluster-config ${cluster_config} \
     --jobs 100;

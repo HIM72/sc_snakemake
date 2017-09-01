@@ -98,11 +98,15 @@ rule quantify:
         index=config['index'],
         gene_map=config['gene_map']
     shell:
+        "if [ $(wc -c < '{input.forward}') -le 1200 ]; then "
+        "touch {params.out_folder}/quant.genes.sf; "
+        "else "
         "salmon quant -i {params.index} "
         "-g {params.gene_map} "
         "-l IU "
         "-1 {input.forward} -2 {input.reverse} "
-        "-o {params.out_folder}"
+        "-o {params.out_folder}; "
+        "fi; "
 
 rule copy_unmerged_forward:
     input:

@@ -93,9 +93,8 @@ def read_salmon(sample_path, isoforms=False, version='0.6.0', col='TPM'):
     if not os.path.isfile(quant_file):
         print("WARNING: Could not find file: %s" % quant_file)
         return
-    else:
+    elif os.stat(quant_file).st_size > 1:
         df = pd.read_table(quant_file, **read_kwargs[version])
-
         df = df.rename(columns={'Name': 'target_id'})
         return df[col]
 
@@ -191,7 +190,12 @@ def read_salmon_qc(sample_path, flen_lim=(100, 100), version='0.6.0'):
     robust_fl_mode = flen_dist[flen_lim[0]:-flen_lim[1]].argmax() + flen_lim[0]
 
     if version == '0.6.0':
-        qc_data = pd.read_json(sample_path + '/aux/meta_info.json', typ='series')
+        aux_path = os.path.join(sample_path, 'aux')
+        if not os.path.isdir(aux_path):
+            aux_path = os.path.join(sample_path, 'aux_info')
+        if not os.path.isdir(aux_path):
+            return 
+        qc_data = pd.read_json(os.path.join(aux_path, 'meta_info.json'), typ='series')
         qc_data = qc_data[['num_processed', 'num_mapped', 'percent_mapped']]
         qc_data['global_fl_mode'] = global_fl_mode
         qc_data['robust_fl_mode'] = robust_fl_mode

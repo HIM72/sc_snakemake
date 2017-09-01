@@ -22,7 +22,7 @@ class Collection(object):
         return {"collection": "/seq",
                 "avus": [{"attribute": "target", "value": "1"},
                          {"attribute": "study_id", "value": "%s" % self.study_id}]}
-                        #{"attribute": "type", "value": "cram"},
+                         # {"attribute": "type", "value": "cram"}]}
 
     def _convert_avus(self, avus):
         return {a['attribute']: a['value'] for a in avus}
