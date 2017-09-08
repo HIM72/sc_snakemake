@@ -1,12 +1,28 @@
 {
-  "__default__":
+    "__default__":
     {
       "n": 1,
-      "memory": 16000
+      "memory": 16000,
+      "error": "logs/default.log",
+      "output": "logs/default.log"
     },
-  "quantify":
+    "quantify":
     {
       "n": 5,
-      "memory": 32000
+      "memory": 32000,
+      "error": "logs/salmon.log",
+      "output": "logs/salmon.log"
+    },
+    "fastqc": {
+      "error": "logs/fastqc.log",
+      "output": "logs/fastqc.log"
+    },
+    "baton_query": {
+      "error": "logs/irods.log",
+      "output": "logs/irods.log"
+    },
+    "irods_metadata": {
+      "error": "logs/irods.log",
+      "output": "logs/irods.log"
     }
 }

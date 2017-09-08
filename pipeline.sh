@@ -55,8 +55,8 @@ done
 echo "using config ${config}"
 
 # Compile bsub command
-bsub_command="bsub -M{cluster.memory} -R 'rusage[mem={cluster.memory}] select[mem>{cluster.memory}] span[hosts=1]' -n {cluster.n} -o job.log"
-irods_bsub_cmd="bsub -M16000 -R 'rusage[mem=16000] select[mem>16000] span[hosts=1]' -n 1 -o job.log"
+bsub_command="bsub -M{cluster.memory} -R 'rusage[mem={cluster.memory}] select[mem>{cluster.memory}] span[hosts=1]' -n {cluster.n} -o {cluster.error} -e {cluster.output}"
+irods_bsub_cmd="bsub -M16000 -R 'rusage[mem=16000] select[mem>16000] span[hosts=1]' -n 1 -o {cluster.output} -e {cluster.error}"
 
 # Collect irods
 if [[ "$skip_task" != "irods" ]];
@@ -67,6 +67,7 @@ snakemake \
     --configfile=${config} \
     --latency-wait 100 \
     --cluster "$irods_bsub_cmd" \
+    --cluster-config ${cluster_config} \
     --jobs 16;
 fi
 

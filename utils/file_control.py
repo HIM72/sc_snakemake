@@ -2,6 +2,8 @@ import re
 
 def create_file_targets(variables, config):
 
+    """ Use a wildcard input from snakemake to generate file targets """
+
     merge_config = config.get("merge", {})
 
     merge_mapper = {}
@@ -70,24 +72,6 @@ def create_file_targets(variables, config):
                 sample2 = "{run}_{lane}#{tag_index}".format(
                     run=run, lane=lane2, tag_index=tag_index)
                 merge_mapper[sample_name] = [sample1, sample2]
-
-                # Map the old sample names for the merge
-                # if direction:
-                #     original_sample1 = config["pattern"].format(
-                #         run=run, lane=lane1, tag_index=tag_index,
-                #         direction=direction)
-                #     original_sample2 = config["pattern"].format(
-                #         run=run, lane=lane2, tag_index=tag_index,
-                #         direction=direction)
-                #     merge_mapper[sample_name] = [original_sample1,
-                #                                  original_sample2]
-                # else:
-                #     original_sample1 = config["pattern"].format(
-                #         run=run, lane=lane1, tag_index=tag_index)
-                #     original_sample2 = config["pattern"].format(
-                #         run=run, lane=lane2, tag_index=tag_index)
-                #     merge_mapper[sample_name] = [original_sample1,
-                #                                  original_sample2]
 
     # Look for missing files
     final_merge_mapper = {}

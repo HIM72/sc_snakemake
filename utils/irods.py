@@ -14,6 +14,8 @@ import pandas as pd
 
 class Collection(object):
 
+    """ Methods to perform on an iRODS collection """
+
     def __init__(self, study_id):
         self.study_id = study_id
 
@@ -28,6 +30,7 @@ class Collection(object):
         return {a['attribute']: a['value'] for a in avus}
 
     def create_query(self, baton_command, query=None, **avus):
+        """ Perform a baton command on a query (default entire collection) """
         if not query:
             query = copy.deepcopy(self.base_query)
         for key, value in six.iteritems(avus):
@@ -42,6 +45,7 @@ class Collection(object):
         return "jq -n '%s' | %s" % (json.dumps(query), baton_command)
 
     def execute_baton(self, baton_command, query=None, **avus):
+        """ Run the baton command in a subprocess """
         command = self.create_query(baton_command, query=query, **avus)
         print("Executing baton command: %s" % command)
         try:
@@ -56,6 +60,7 @@ class Collection(object):
 
     def move_from_irods(self, out_folder=None, id_run=None, lane=None,
                         tag_index=None):
+        """ Pull data from iRODS to the specified folder """
         if not out_folder:
             out_folder = '/nfs/team205/.scapi/%s/cram' % str(self.study_id)
         if not os.path.isdir(out_folder):
@@ -90,14 +95,8 @@ class Collection(object):
             out_folder = '/nfs/team205/.scapi/%s/cram' % str(self.study_id)
         if not os.path.isdir(out_folder):
             os.makedirs(out_folder)
-        # query = copy.deepcopy(self.base_query)
-        # if id_run:
-        #     query["avus"].append({"attribute": "id_run", "value": str(id_run)})
-        # if lane:
-        #     query["avus"].append({"attribute": "lane", "value": str(lane)})
         data_objects = self.execute_baton('baton-metaquery',
                                           id_run=id_run, lane=lane)
-        print(data_objects)
         get_query = copy.deepcopy(data_objects)
         for item in get_query:
             item['directory'] = out_folder

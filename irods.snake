@@ -10,6 +10,7 @@ query = config.get('query')
 collection = Collection(config["study_id"])
 items = []
 
+# Fetch the file targets
 if query:
     for run in query:
         if len(query[run].keys()):
@@ -27,6 +28,7 @@ if query:
 else:
     items = collection.get_collection_metadata()
 
+# Define the important directories
 DATA_FOLDER = config.get('data_folder')
 TMP_FOLDER = config.get('tmp_folder',
                         os.path.join(config['data_folder'], '.tmp'))

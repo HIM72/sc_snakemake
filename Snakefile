@@ -2,6 +2,7 @@ import os
 from utils.parse import read_quants, read_qcs
 from utils.file_control import create_file_targets
 
+# Define the directories
 DATA_FOLDER = config['data_folder']
 CRAM_FOLDER = config.get('cram_folder', os.path.join(DATA_FOLDER, 'cram'))
 FASTQ_FOLDER = config.get('fastq_folder', os.path.join(DATA_FOLDER, 'fastq'))
@@ -13,8 +14,10 @@ FROM = config.get('from', 'cram')
 REVERSE = config.get('reverse', 'reverse')
 FORWARD = config.get('forward', 'forward')
 
+# This is the temporary directory for faster alignment
 LUSTRE = config['lustre_folder']
 
+# Define the target files
 merge_mapper = {}
 if FROM == 'cram':
     glob_pattern = os.path.join(CRAM_FOLDER, config['pattern'] + '.cram')
@@ -22,6 +25,7 @@ elif FROM == 'fastq':
     glob_pattern = os.path.join(FASTQ_FOLDER, config['pattern'] + '.fastq')
 glob_variables = glob_wildcards(glob_pattern)
 
+# Create merged targets, if any
 original_samples, final_samples, merge_mapper = create_file_targets(
     glob_variables, config)
 
@@ -30,10 +34,13 @@ rule all:
         os.path.join(RESULTS_FOLDER, "results", "tpm.csv"),
         os.path.join(RESULTS_FOLDER, "results", "counts.csv"),
         os.path.join(RESULTS_FOLDER, "qc", "salmon_qc.csv")
+        # Currently we are leaving out fastqc as it has a tendency to crash
+        # Something to do with java VM memory
         # os.path.join(RESULTS_FOLDER, "qc", "multiqc_salmon", "multiqc_report.html"),
         # os.path.join(RESULTS_FOLDER, "qc", "multiqc_fastqc", "multiqc_report.html"),
 
 rule multiqc_salmon:
+    # Combine the quality outputs into a multiqc report
     input:
         expand(os.path.join(RESULTS_FOLDER, "quant", "{sample}", 
                "quant.genes.sf"), sample=final_samples)
@@ -47,6 +54,7 @@ rule multiqc_salmon:
             out_folder = os.path.join(RESULTS_FOLDER, "qc", "multiqc_salmon"))
 
 rule read_salmon_qcs:
+    # Combine the salmon QC output into a single table
     input:
         expand(os.path.join(RESULTS_FOLDER, "quant", "{sample}", 
                "quant.genes.sf"), sample=final_samples)
@@ -59,6 +67,7 @@ rule read_salmon_qcs:
         qcs.to_csv(output[0])
 
 rule read_reads:
+    # Combine the read count into a single table
     input:
         expand(os.path.join(RESULTS_FOLDER, "quant", "{sample}", 
                "quant.genes.sf"), sample=final_samples)
@@ -72,6 +81,7 @@ rule read_reads:
         results.to_csv(output[0])
 
 rule read_tpm:
+    # Combine the computed TPM into a single table
     input:
         expand(os.path.join(RESULTS_FOLDER, "quant", "{sample}", 
                "quant.genes.sf"), sample=final_samples)
@@ -109,6 +119,7 @@ rule quantify:
         "fi; "
 
 rule copy_unmerged_forward:
+    # If we aren't merging anything, copy the files directly to lustre
     input:
         lambda wildcards: os.path.join(
             FASTQ_FOLDER,
@@ -120,6 +131,7 @@ rule copy_unmerged_forward:
         "cp {input} {output}"
 
 rule copy_unmerged_reverse:
+    # If we aren't merging anything, copy the files directly to lustre
     input:
         lambda wildcards: os.path.join(
             FASTQ_FOLDER,
@@ -131,6 +143,7 @@ rule copy_unmerged_reverse:
         "cp {input} {output}"
 
 rule merge_reverse:
+    # Merge the reverse-stranded files
     input:
         lambda wildcards: [
             os.path.join(FASTQ_FOLDER, 
@@ -150,6 +163,7 @@ rule merge_reverse:
         "cat {input} > {output}"
 
 rule merge_forward:
+    # Merge the forward-stranded files
     input:
         lambda wildcards: [
             os.path.join(
@@ -169,6 +183,7 @@ rule merge_forward:
         "cat {input} > {output}"
 
 rule multiqc_fastqc:
+    # Combine the fastqc reports into a single HTML file
     input:
         lambda wildcards: 
             expand(os.path.join(TEMP_FOLDER, "fastqc", 
@@ -186,6 +201,7 @@ rule multiqc_fastqc:
         "multiqc {params.fastqc_folder} -o {params.multiqc_folder}"
 
 rule fastqc:
+    # Run fastqc
     input:
         forward=os.path.join(
             FASTQ_FOLDER, "{original_sample}_" + FORWARD + ".fastq"),
@@ -204,6 +220,7 @@ rule fastqc:
         "fastqc -o {params.out_dir} {input.forward} {input.reverse}"
 
 rule convert_fastq:
+    # Convert from cram to fastq
     input:
         lambda wildcards: [
             os.path.join(CRAM_FOLDER, "{original_sample}.cram".format(
